@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>7SS - Full-Screen Stacked Circular UI</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            theme: {
+              cream: '#FAF8F5',
+              cardWhite: '#FFFFFF',
+              yellow: '#FACC15',
+              yellowDark: '#EAB308',
+              black: '#09090B',
+              burgundy: '#4A0E17',
+              burgundyDark: '#2D080E',
+              burgundyLight: '#7A1C2B',
+              border: '#E5E1DA'
+            },
+            seg: {
+              red: '#EF4444',
+              orange: '#F97316',
+              yellow: '#EAB308',
+              green: '#10B981',
+              blue: '#3B82F6',
+              indigo: '#6366F1',
+              violet: '#8B5CF6',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Glowing Effects & Smooth Animations */
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 6px currentColor); }
+      50% { transform: scale(1.15); filter: drop-shadow(0 0 16px currentColor); }
+    }
+    .animate-glow {
+      animation: pulseGlow 2.8s ease-in-out infinite;
+    }
+
+    /* Glassmorphism Burgundy */
+    .glass-burgundy {
+      background: rgba(74, 14, 23, 0.94);
+      backdrop-filter: blur(16px);
+    }
+
+    /* Smooth Custom Scrollbar for In-Bubble Contents */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Circular Stacked Viewport Aesthetics */
+    .circle-bubble-card {
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 20px 40px -15px rgba(0,0,0,0.25);
+    }
+
+    .circle-bubble-card:hover {
+      transform: translateY(-6px) scale(1.02);
+    }
+  </style>
+</head>
+<body class="bg-theme-cream text-theme-black font-sans antialiased min-h-screen flex flex-col selection:bg-theme-yellow selection:text-theme-black overflow-x-hidden">
+
+  <!-- ========================================================================= -->
+  <!-- 1. OS STANDBY FLOATING WIDGET (DYNAMIC ISLAND OVERLAY)                    -->
+  <!-- ========================================================================= -->
+  <div id="os-overlay-island" class="fixed top-3 left-1/2 -translate-x-1/2 z-50 transition-all duration-300">
+    <div class="glass-burgundy text-white border border-theme-burgundyLight/80 rounded-full px-5 py-2 shadow-2xl flex items-center space-x-4">
+      
+      <!-- Main Launcher Button -->
+      <button onclick="toggleMainAppUI()" title="Toggle 7SS Workspace" class="flex items-center space-x-2 bg-theme-yellow hover:bg-theme-yellowDark text-theme-black px-3 py-1 rounded-full font-bold text-xs transition shadow-md active:scale-95">
+        <i data-lucide="layers" class="w-4 h-4 text-theme-black"></i>
+        <span>7SS OS</span>
+      </button>
+
+      <!-- 7 Floating Circular Rainbow Bubbles in Island -->
+      <div class="flex items-center space-x-1.5 border-l border-white/20 pl-3">
+        <button onclick="bringBubbleToFront(1)" title="1. Red: Primary Projects" class="w-6 h-6 rounded-full bg-seg-red text-white flex items-center justify-center text-[10px] font-black transition hover:scale-125 shadow-md">1</button>
+        <button onclick="bringBubbleToFront(2)" title="2. Orange: Task Breakdown" class="w-6 h-6 rounded-full bg-seg-orange text-white flex items-center justify-center text-[10px] font-black transition hover:scale-125 shadow-md">2</button>
+        <button onclick="bringBubbleToFront(3)" title="3. Yellow: Strategic Direction" class="w-6 h-6 rounded-full bg-seg-yellow text-theme-black flex items-center justify-center text-[10px] font-black transition hover:scale-125 shadow-md">3</button>
+        <button onclick="bringBubbleToFront(4)" title="4. Green: Active Workstation CV" class="w-6 h-6 rounded-full bg-seg-green text-white flex items-center justify-center text-[10px] font-black transition hover:scale-125 shadow-md">4</button>
+        <button onclick="bringBubbleToFront(5)" title="5. Blue: Comms & Feedback" class="w-6 h-6 rounded-full bg-seg-blue text-white flex items-center justify-center text-[10px] font-black transition hover:scale-125 shadow-md">5</button>
+        <button onclick="bringBubbleToFront(6)" title="6. Indigo: System Telemetry" class="w-6 h-6 rounded-full bg-seg-indigo text-white flex items-center justify-center text-[10px] font-black transition hover:scale-125 shadow-md">6</button>
+        <button onclick="bringBubbleToFront(7)" title="7. Violet: Final Vault" class="w-6 h-6 rounded-full bg-seg-violet text-white flex items-center justify-center text-[10px] font-black transition hover:scale-125 shadow-md">7</button>
+      </div>
+
+      <!-- Live Screen OCR Parsing Indicator -->
+      <div class="hidden sm:flex items-center space-x-2 border-l border-white/20 pl-3 text-[11px] font-mono">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-theme-yellow opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-theme-yellow"></span>
+        </span>
+        <span id="os-status-text" class="text-slate-200">CV OCR Engine: Tracking Screen</span>
+      </div>
+
+      <!-- Trigger Pipeline Action Button -->
+      <button onclick="runRainbowPipeline()" title="Run Full 7-Phase Rainbow Pipeline" class="p-1.5 rounded-full hover:bg-white/10 text-theme-yellow transition">
+        <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+      </button>
+
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- 2. FULL-SCREEN UI & SYSTEM CONTROL HEADER                                 -->
+  <!-- ========================================================================= -->
+  <div id="main-app-container" class="flex-1 flex flex-col w-full max-w-7xl mx-auto px-4 sm:px-6 pt-16 pb-6 space-y-4">
+    
+    <!-- HEADER BAR -->
+    <header class="bg-theme-cardWhite border border-theme-border rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-full bg-theme-burgundy text-theme-yellow flex items-center justify-center font-black text-lg shadow-md border-2 border-theme-yellow">
+          7
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="text-lg font-black text-theme-black tracking-tight">7SS</h1>
+            <span class="bg-theme-yellow text-theme-black font-mono font-bold text-[10px] px-2 py-0.5 rounded-full border border-theme-yellowDark">7-BUBBLE STACK</span>
+          </div>
+          <p class="text-xs text-slate-500">Autonomous Screen CV & Rainbow 7 Segments & Sequences Workflow System</p>
+        </div>
+      </div>
+
+      <!-- Global Trajectory Bar & Controls -->
+      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        <div class="bg-slate-50 border border-theme-border rounded-xl px-3 py-1.5 flex items-center space-x-3 text-xs flex-1 md:flex-none">
+          <span class="font-bold text-theme-burgundy">Global Trajectory:</span>
+          <div class="w-32 bg-slate-200 h-2 rounded-full overflow-hidden">
+            <div id="global-progress-bar" class="bg-theme-burgundy h-full w-3/7 transition-all duration-500"></div>
+          </div>
+          <span id="global-progress-text" class="font-mono font-bold text-theme-burgundy">43%</span>
+        </div>
+
+        <button onclick="openSetupWizard()" class="bg-theme-yellow hover:bg-theme-yellowDark text-theme-black font-bold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm">
+          <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+          <span>System Setup</span>
+        </button>
+      </div>
+    </header>
+
+
+    <!-- ========================================================================= -->
+    <!-- 3. FULL-SCREEN 7-BUBBLE CIRCULAR STACKED VIEWPORT                         -->
+    <!-- ========================================================================= -->
+    <main class="flex-1 relative min-h-[640px] flex items-center justify-center my-2">
+      
+      <!-- SUBTLE RAINBOW ORBIT GLOW BACKGROUND -->
+      <div class="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
+        <div class="w-[620px] h-[620px] rounded-full border-4 border-dashed border-theme-burgundy animate-spin" style="animation-duration: 60s;"></div>
+      </div>
+
+
+      <!-- ===================================================================== -->
+      <!-- BUBBLE 7: VIOLET CIRCULAR CONTAINER (FURTHEST BACK)                   -->
+      <!-- ===================================================================== -->
+      <div onclick="bringBubbleToFront(7)" id="bubble-card-7" class="circle-bubble-card absolute w-[520px] h-[520px] sm:w-[580px] sm:h-[580px] rounded-full bg-white border-4 border-seg-violet p-8 flex flex-col justify-between cursor-pointer transition-all duration-500 z-10" style="transform: translateY(-90px) scale(0.72);">
+        
+        <!-- Bubble Header -->
+        <div class="flex items-center justify-between border-b border-seg-violet/30 pb-2">
+          <div class="flex items-center space-x-2">
+            <span class="w-4 h-4 rounded-full bg-seg-violet text-white text-[10px] font-bold flex items-center justify-center">7</span>
+            <h3 class="font-extrabold text-sm text-seg-violet uppercase tracking-wide">Violet Domain: Deliverables Vault</h3>
+          </div>
+          <span class="text-[10px] font-mono bg-violet-50 text-seg-violet font-bold px-2 py-0.5 rounded-full border border-violet-200">Phase 7</span>
+        </div>
+
+        <!-- In-Bubble Scrollable Content -->
+        <div class="flex-1 overflow-y-auto my-3 pr-2 space-y-3 text-xs">
+          <p class="text-slate-500">Final deliverables ready for local auto-export across designated system channels.</p>
+          
+          <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-theme-black">Reconciled_Q4_Summary.pdf</span>
+              <span class="text-[10px] font-mono bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">READY</span>
+            </div>
+            <p class="text-[11px] text-slate-500">PDF Document • 2.4 MB • Generated via 7SS Chain</p>
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              <button onclick="exportAsset('Desktop')" class="text-[10px] bg-theme-burgundy text-white hover:bg-theme-burgundyDark px-2 py-1 rounded-lg font-semibold transition">Desktop</button>
+              <button onclick="exportAsset('Documents')" class="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-800 px-2 py-1 rounded-lg font-semibold transition">Documents Folder</button>
+              <button onclick="exportAsset('Browser App')" class="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-800 px-2 py-1 rounded-lg font-semibold transition">Web Extension</button>
+            </div>
+          </div>
+
+          <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-theme-black">Client_Onboarding_Form_Draft.docx</span>
+              <span class="text-[10px] font-mono bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-bold">QUEUED</span>
+            </div>
+            <p class="text-[11px] text-slate-500">Structured Doc • 180 KB • Pending User Final Approval</p>
+          </div>
+        </div>
+
+        <!-- Bubble Footer -->
+        <div class="pt-2 border-t border-slate-200 text-center">
+          <span class="text-[10px] font-mono text-slate-400">Click circle to expand Violet Vault</span>
+        </div>
+      </div>
+
+
+      <!-- ===================================================================== -->
+      <!-- BUBBLE 6: INDIGO CIRCULAR CONTAINER                                   -->
+      <!-- ===================================================================== -->
+      <div onclick="bringBubbleToFront(6)" id="bubble-card-6" class="circle-bubble-card absolute w-[520px] h-[520px] sm:w-[580px] sm:h-[580px] rounded-full bg-white border-4 border-seg-indigo p-8 flex flex-col justify-between cursor-pointer transition-all duration-500 z-20" style="transform: translateY(-75px) scale(0.76);">
+        
+        <div class="flex items-center justify-between border-b border-seg-indigo/30 pb-2">
+          <div class="flex items-center space-x-2">
+            <span class="w-4 h-4 rounded-full bg-seg-indigo text-white text-[10px] font-bold flex items-center justify-center">6</span>
+            <h3 class="font-extrabold text-sm text-seg-indigo uppercase tracking-wide">Indigo Domain: Deep Telemetry</h3>
+          </div>
+          <span class="text-[10px] font-mono bg-indigo-50 text-seg-indigo font-bold px-2 py-0.5 rounded-full border border-indigo-200">Phase 6</span>
+        </div>
+
+        <div class="flex-1 overflow-y-auto my-3 pr-2 space-y-3 text-xs">
+          <div class="grid grid-cols-2 gap-2 text-center font-mono">
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="text-[10px] text-slate-400 uppercase block">Local LLM Latency</span>
+              <span class="font-bold text-slate-800 text-sm">12.4 ms</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="text-[10px] text-slate-400 uppercase block">OCR Accuracy</span>
+              <span class="font-bold text-emerald-600 text-sm">99.6%</span>
+            </div>
+          </div>
+
+          <div class="p-3 bg-slate-900 text-slate-200 rounded-2xl font-mono text-[11px] space-y-1 border border-slate-800">
+            <div class="text-seg-indigo font-bold">SYSTEM TELEMETRY LOGS</div>
+            <p>[09:12] Drools Rule Engine: Active</p>
+            <p>[09:14] SQLite Local Store: Encrypted (AES-256)</p>
+            <p>[09:15] Memory Buffer: 342 MB / 16 GB</p>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-200 text-center">
+          <span class="text-[10px] font-mono text-slate-400">Click circle to expand Indigo Telemetry</span>
+        </div>
+      </div>
+
+
+      <!-- ===================================================================== -->
+      <!-- BUBBLE 5: BLUE CIRCULAR CONTAINER                                     -->
+      <!-- ===================================================================== -->
+      <div onclick="bringBubbleToFront(5)" id="bubble-card-5" class="circle-bubble-card absolute w-[520px] h-[520px] sm:w-[580px] sm:h-[580px] rounded-full bg-white border-4 border-seg-blue p-8 flex flex-col justify-between cursor-pointer transition-all duration-500 z-30" style="transform: translateY(-60px) scale(0.80);">
+        
+        <div class="flex items-center justify-between border-b border-seg-blue/30 pb-2">
+          <div class="flex items-center space-x-2">
+            <span class="w-4 h-4 rounded-full bg-seg-blue text-white text-[10px] font-bold flex items-center justify-center">5</span>
+            <h3 class="font-extrabold text-sm text-seg-blue uppercase tracking-wide">Blue Domain: Comms & Agent Feedback</h3>
+          </div>
+          <span class="text-[10px] font-mono bg-blue-50 text-seg-blue font-bold px-2 py-0.5 rounded-full border border-blue-200">Phase 5</span>
+        </div>
+
+        <div class="flex-1 overflow-y-auto my-3 pr-2 space-y-3 text-xs">
+          <!-- Chat Feed -->
+          <div class="space-y-2">
+            <div class="p-2.5 bg-blue-50/70 border border-blue-100 rounded-2xl text-slate-800">
+              <span class="font-bold text-seg-blue text-[10px] block">7SS Agent #05</span>
+              <span>"Detected 2 missing invoices in folder. Should I draft an email to vendor support?"</span>
+            </div>
+            <div class="p-2.5 bg-slate-100 border border-slate-200 rounded-2xl text-slate-800 text-right">
+              <span class="font-bold text-slate-600 text-[10px] block">User Prompt</span>
+              <span>"Yes, please draft the email and save it in my drafts."</span>
+            </div>
+          </div>
+
+          <!-- Direct Input Prompt Area -->
+          <div class="pt-2 space-y-2">
+            <input id="blue-input-text" type="text" placeholder="Type new prompt directive or feedback..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-seg-blue">
+            <button onclick="sendBluePrompt()" class="w-full bg-seg-blue hover:bg-blue-600 text-white font-bold py-1.5 rounded-xl text-xs transition shadow-sm">
+              Send Instruction to System
+            </button>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-200 text-center">
+          <span class="text-[10px] font-mono text-slate-400">Click circle to expand Blue Comms</span>
+        </div>
+      </div>
+
+
+      <!-- ===================================================================== -->
+      <!-- BUBBLE 4: GREEN CIRCULAR CONTAINER                                    -->
+      <!-- ===================================================================== -->
+      <div onclick="bringBubbleToFront(4)" id="bubble-card-4" class="circle-bubble-card absolute w-[520px] h-[520px] sm:w-[580px] sm:h-[580px] rounded-full bg-white border-4 border-seg-green p-8 flex flex-col justify-between cursor-pointer transition-all duration-500 z-40" style="transform: translateY(-45px) scale(0.85);">
+        
+        <div class="flex items-center justify-between border-b border-seg-green/30 pb-2">
+          <div class="flex items-center space-x-2">
+            <span class="w-4 h-4 rounded-full bg-seg-green text-white text-[10px] font-bold flex items-center justify-center">4</span>
+            <h3 class="font-extrabold text-sm text-seg-green uppercase tracking-wide">Green Domain: Live Workstation CV</h3>
+          </div>
+          <span class="text-[10px] font-mono bg-emerald-50 text-seg-green font-bold px-2 py-0.5 rounded-full border border-emerald-200">Phase 4</span>
+        </div>
+
+        <div class="flex-1 overflow-y-auto my-3 pr-2 space-y-3 text-xs">
+          <!-- Live Simulated Canvas / CV Box Overlay -->
+          <div class="relative bg-slate-950 rounded-2xl p-3 border border-slate-800 text-emerald-400 font-mono text-[11px] h-36 flex flex-col justify-between overflow-hidden">
+            <!-- Simulated Bounding Box Overlay -->
+            <div class="absolute top-3 left-4 border-2 border-dashed border-emerald-400 bg-emerald-500/10 px-2 py-1 rounded text-[9px] text-emerald-300">
+              BOUNDING BOX #1: PDF INVOICE TABLE
+            </div>
+            <div class="absolute bottom-3 right-4 border-2 border-dashed border-theme-yellow bg-yellow-500/10 px-2 py-1 rounded text-[9px] text-theme-yellow">
+              BOUNDING BOX #2: EXCEL ROW #14
+            </div>
+
+            <div class="z-10 flex items-center justify-between text-[10px] text-slate-400 border-b border-slate-800 pb-1">
+              <span>REAL-TIME CV FEED</span>
+              <span class="animate-pulse text-emerald-400">● LIVE (30 FPS)</span>
+            </div>
+            <p class="z-10 text-slate-300">OCR Parsing active: PaddledOCR extracting values from active window...</p>
+          </div>
+
+          <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+            <span class="font-bold text-slate-700">Automation Log:</span>
+            <p class="text-[11px] text-slate-500">Dispatched simulated PyAutoGUI cursor hover to coordinates (X: 1240, Y: 420)</p>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-200 text-center">
+          <span class="text-[10px] font-mono text-slate-400">Click circle to expand Green Workstation</span>
+        </div>
+      </div>
+
+
+      <!-- ===================================================================== -->
+      <!-- BUBBLE 3: YELLOW CIRCULAR CONTAINER                                   -->
+      <!-- ===================================================================== -->
+      <div onclick="bringBubbleToFront(3)" id="bubble-card-3" class="circle-bubble-card absolute w-[520px] h-[520px] sm:w-[580px] sm:h-[580px] rounded-full bg-white border-4 border-seg-yellow p-8 flex flex-col justify-between cursor-pointer transition-all duration-500 z-50" style="transform: translateY(-30px) scale(0.90);">
+        
+        <div class="flex items-center justify-between border-b border-seg-yellow/30 pb-2">
+          <div class="flex items-center space-x-2">
+            <span class="w-4 h-4 rounded-full bg-seg-yellow text-theme-black text-[10px] font-bold flex items-center justify-center">3</span>
+            <h3 class="font-extrabold text-sm text-theme-black uppercase tracking-wide">Yellow Domain: Strategic Direction & Demo</h3>
+          </div>
+          <span class="text-[10px] font-mono bg-yellow-100 text-theme-black font-bold px-2 py-0.5 rounded-full border border-yellow-300">Phase 3</span>
+        </div>
+
+        <div class="flex-1 overflow-y-auto my-3 pr-2 space-y-3 text-xs">
+          <p class="text-slate-600">Strategic direction forecast generated by the core 7SS LLM engine.</p>
+          
+          <div class="p-3 bg-yellow-50/80 border border-yellow-200 rounded-2xl space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-theme-black">Proposed Action Sequence</span>
+              <span class="text-[10px] font-mono bg-theme-yellow px-2 py-0.5 rounded text-theme-black font-bold">OPTIMAL</span>
+            </div>
+            <p class="text-[11px] text-slate-700">1. Consolidate 4 invoice totals in Excel spreadsheet.<br>2. Highlight $1,450 variance.<br>3. Auto-draft query document in Violet Vault.</p>
+          </div>
+
+          <div class="p-3 bg-slate-900 text-slate-100 rounded-2xl font-mono text-[11px] space-y-1 border border-slate-800">
+            <span class="text-theme-yellow font-bold">QUICK-VIEW DELIVERABLE CANVAS</span>
+            <p class="text-slate-300">Target File: Reconciled_Q4_Summary.pdf</p>
+            <p class="text-slate-400">Status: Formatted & Verified</p>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-200 text-center">
+          <span class="text-[10px] font-mono text-slate-400">Click circle to expand Yellow Direction</span>
+        </div>
+      </div>
+
+
+      <!-- ===================================================================== -->
+      <!-- BUBBLE 2: ORANGE CIRCULAR CONTAINER                                   -->
+      <!-- ===================================================================== -->
+      <div onclick="bringBubbleToFront(2)" id="bubble-card-2" class="circle-bubble-card absolute w-[520px] h-[520px] sm:w-[580px] sm:h-[580px] rounded-full bg-white border-4 border-seg-orange p-8 flex flex-col justify-between cursor-pointer transition-all duration-500 z-60" style="transform: translateY(-15px) scale(0.95);">
+        
+        <div class="flex items-center justify-between border-b border-seg-orange/30 pb-2">
+          <div class="flex items-center space-x-2">
+            <span class="w-4 h-4 rounded-full bg-seg-orange text-white text-[10px] font-bold flex items-center justify-center">2</span>
+            <h3 class="font-extrabold text-sm text-seg-orange uppercase tracking-wide">Orange Domain: Task Breakdown</h3>
+          </div>
+          <span class="text-[10px] font-mono bg-orange-50 text-seg-orange font-bold px-2 py-0.5 rounded-full border border-orange-200">Phase 2</span>
+        </div>
+
+        <div class="flex-1 overflow-y-auto my-3 pr-2 space-y-2 text-xs">
+          <p class="text-slate-600 font-medium">Decomposed sequence tasks for selected project:</p>
+
+          <div onclick="selectSubTask('sub1')" class="p-3 bg-slate-50 hover:bg-orange-50/60 border border-slate-200 hover:border-seg-orange rounded-2xl transition space-y-1 cursor-pointer">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-800">SUB-01: Parse Invoices from Downloads</span>
+              <span class="text-[10px] font-mono bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">DONE</span>
+            </div>
+            <p class="text-[11px] text-slate-500">Segment type: Local PDF Folder Scan</p>
+          </div>
+
+          <div onclick="selectSubTask('sub2')" class="p-3 bg-slate-50 hover:bg-orange-50/60 border border-slate-200 hover:border-seg-orange rounded-2xl transition space-y-1 cursor-pointer">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-800">SUB-02: Reconcile Row Totals with Spreadsheet</span>
+              <span class="text-[10px] font-mono bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded font-bold">IN PROGRESS</span>
+            </div>
+            <p class="text-[11px] text-slate-500">Segment type: Active Excel Sheet</p>
+          </div>
+
+          <div onclick="selectSubTask('sub3')" class="p-3 bg-slate-50 hover:bg-orange-50/60 border border-slate-200 hover:border-seg-orange rounded-2xl transition space-y-1 cursor-pointer">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-800">SUB-03: Export Final Summary Document</span>
+              <span class="text-[10px] font-mono bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-bold">QUEUED</span>
+            </div>
+            <p class="text-[11px] text-slate-500">Segment type: Vault PDF Generation</p>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-200 text-center">
+          <span class="text-[10px] font-mono text-slate-400">Click circle to expand Orange Breakdown</span>
+        </div>
+      </div>
+
+
+      <!-- ===================================================================== -->
+      <!-- BUBBLE 1: RED CIRCULAR CONTAINER (FRONT & LARGEST)                    -->
+      <!-- ===================================================================== -->
+      <div onclick="bringBubbleToFront(1)" id="bubble-card-1" class="circle-bubble-card absolute w-[520px] h-[520px] sm:w-[580px] sm:h-[580px] rounded-full bg-white border-4 border-seg-red p-8 flex flex-col justify-between cursor-pointer transition-all duration-500 z-70" style="transform: translateY(0px) scale(1);">
+        
+        <!-- Header inside Red Bubble -->
+        <div class="flex items-center justify-between border-b border-seg-red/30 pb-2">
+          <div class="flex items-center space-x-2">
+            <span class="w-4 h-4 rounded-full bg-seg-red text-white text-[10px] font-bold flex items-center justify-center animate-ping">1</span>
+            <h3 class="font-extrabold text-sm text-seg-red uppercase tracking-wide">Red Domain: Main Projects</h3>
+          </div>
+          <span class="text-[10px] font-mono bg-red-100 text-seg-red font-bold px-2 py-0.5 rounded-full border border-red-200">PRIMARY PHASE</span>
+        </div>
+
+        <!-- In-Bubble Scrollable Content -->
+        <div class="flex-1 overflow-y-auto my-3 pr-2 space-y-3 text-xs">
+          <!-- Onboarding Checklist Widget -->
+          <div class="p-3 bg-red-50/60 border border-red-200 rounded-2xl space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-theme-burgundy">System Onboarding Checklist</span>
+              <span class="text-[10px] font-mono bg-theme-yellow px-2 py-0.5 rounded text-theme-black font-bold">3 / 3 COMPLETED</span>
+            </div>
+            <div class="space-y-1 text-[11px] text-slate-700">
+              <div class="flex items-center gap-1.5"><i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i> Screen Capture OCR Granted</div>
+              <div class="flex items-center gap-1.5"><i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i> Desktop/Documents Folder Granted</div>
+              <div class="flex items-center gap-1.5"><i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i> Local LLM & Drools Rule Engine Initialized</div>
+            </div>
+          </div>
+
+          <!-- Main Projects List inside Red Bubble -->
+          <div class="space-y-2">
+            <span class="font-bold text-slate-800 block">Active High-Level Objectives:</span>
+
+            <!-- Project 1 (Selected) -->
+            <div onclick="selectMainProject('p1')" class="p-3 bg-red-50/90 border-2 border-seg-red rounded-2xl transition space-y-1 cursor-pointer">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-theme-black">PROJ-01: Q4 Budget & Invoice Reconciliation</span>
+                <span class="text-[10px] font-mono bg-seg-red text-white px-2 py-0.5 rounded font-bold">ACTIVE</span>
+              </div>
+              <p class="text-[11px] text-slate-600">Cross-verifies active Google Sheets data against PDF invoices and calendar entries.</p>
+            </div>
+
+            <!-- Project 2 -->
+            <div onclick="selectMainProject('p2')" class="p-3 bg-slate-50 hover:bg-red-50/40 border border-slate-200 hover:border-seg-red rounded-2xl transition space-y-1 cursor-pointer">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-theme-black">PROJ-02: Client Onboarding Workflow Sync</span>
+                <span class="text-[10px] font-mono bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-bold">STANDBY</span>
+              </div>
+              <p class="text-[11px] text-slate-500">Extracts onboarding web form data and generates doc templates.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bubble Footer -->
+        <div class="pt-2 border-t border-slate-200 flex items-center justify-between text-[11px]">
+          <span class="font-mono text-slate-400">Click circle to focus Red Phase</span>
+          <button onclick="bringBubbleToFront(2)" class="text-seg-red font-bold flex items-center gap-1 hover:underline">
+            Next: Orange <i data-lucide="arrow-right" class="w-3 h-3"></i>
+          </button>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- 4. SYSTEM SETUP & PERMISSIONS WIZARD MODAL                                -->
+  <!-- ========================================================================= -->
+  <div id="modal-setup" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-theme-cardWhite border border-theme-border rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div class="flex items-center space-x-2">
+          <div class="w-7 h-7 rounded-full bg-theme-burgundy text-theme-yellow flex items-center justify-center font-black text-xs">
+            7
+          </div>
+          <h3 class="font-bold text-base text-theme-black">7SS Preferences & Setup</h3>
+        </div>
+        <button onclick="closeSetupWizard()" class="text-slate-400 hover:text-theme-black transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-600 leading-relaxed">
+        7SS (7 Segments & Sequences) uses local Computer Vision and the 7-phase rainbow sequence algorithm to parse screen activities and organize deliverables.
+      </p>
+
+      <div class="space-y-3 text-xs">
+        <label class="flex items-center justify-between p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
+          <span class="font-semibold text-theme-black">Screen Capture OCR Access</span>
+          <input type="checkbox" checked class="w-4 h-4 text-theme-burgundy rounded">
+        </label>
+        <label class="flex items-center justify-between p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
+          <span class="font-semibold text-theme-black">Desktop / Documents Folder Path</span>
+          <input type="checkbox" checked class="w-4 h-4 text-theme-burgundy rounded">
+        </label>
+        <label class="flex items-center justify-between p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
+          <span class="font-semibold text-theme-black">Web Browser Extension Integration</span>
+          <input type="checkbox" checked class="w-4 h-4 text-theme-burgundy rounded">
+        </label>
+      </div>
+
+      <button onclick="closeSetupWizard()" class="w-full bg-theme-yellow hover:bg-theme-yellowDark text-theme-black font-bold py-3 rounded-2xl text-xs transition shadow-md">
+        Save Preferences & Apply
+      </button>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- 5. INTERACTIVE LOGIC & STACKED BUBBLE RE-ORDERING                         -->
+  <!-- ========================================================================= -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    let currentFrontBubble = 1;
+
+    // Stack Transformation Configuration for standard 7-depth circular layers
+    const stackTransforms = {
+      // Offset steps relative to front bubble (0 = front, 1 = 1 layer back, etc.)
+      0: { translateY: "0px", scale: "1.00", zIndex: 70 },
+      1: { translateY: "-15px", scale: "0.95", zIndex: 60 },
+      2: { translateY: "-30px", scale: "0.90", zIndex: 50 },
+      3: { translateY: "-45px", scale: "0.85", zIndex: 40 },
+      4: { translateY: "-60px", scale: "0.80", zIndex: 30 },
+      5: { translateY: "-75px", scale: "0.76", zIndex: 20 },
+      6: { translateY: "-90px", scale: "0.72", zIndex: 10 },
+    };
+
+    // Bring selected bubble number to the front of the 7-bubble circular stack
+    function bringBubbleToFront(bubbleNum) {
+      currentFrontBubble = bubbleNum;
+
+      for (let i = 1; i <= 7; i++) {
+        const card = document.getElementById(`bubble-card-${i}`);
+        if (!card) continue;
+
+        // Calculate circular depth offset relative to the active front bubble
+        let depthOffset = (i - bubbleNum + 7) % 7;
+        const style = stackTransforms[depthOffset];
+
+        card.style.transform = `translateY(${style.translateY}) scale(${style.scale})`;
+        card.style.zIndex = style.zIndex;
+      }
+
+      // Update Global Progress percentage dynamically based on active phase focus
+      const progressPercent = Math.round((bubbleNum / 7) * 100);
+      document.getElementById('global-progress-bar').style.width = `${progressPercent}%`;
+      document.getElementById('global-progress-text').innerText = `${progressPercent}%`;
+    }
+
+    // Sequentially animate through the full 7-Phase Rainbow Pipeline (Red -> Violet)
+    function runRainbowPipeline() {
+      let phase = 1;
+      const interval = setInterval(() => {
+        bringBubbleToFront(phase);
+        phase++;
+        if (phase > 7) {
+          clearInterval(interval);
+        }
+      }, 700);
+    }
+
+    // Toggle Main Application UI
+    function toggleMainAppUI() {
+      const container = document.getElementById('main-app-container');
+      container.classList.toggle('opacity-30');
+      container.classList.toggle('pointer-events-none');
+    }
+
+    // Sub-Task Drilldown Helper
+    function selectSubTask(subId) {
+      // drill-down transition directly to Yellow (Strategic Direction)
+      bringBubbleToFront(3);
+    }
+
+    function selectMainProject(projId) {
+      // drill-down transition directly to Orange (Task Breakdown)
+      bringBubbleToFront(2);
+    }
+
+    // Feedback Prompt Submission inside Blue Bubble
+    function sendBluePrompt() {
+      const input = document.getElementById('blue-input-text');
+      if (input.value.trim()) {
+        alert(`Prompt Instruction Recorded: "${input.value}"\nRouting directive through 7-phase algorithm pipeline...`);
+        input.value = '';
+        runRainbowPipeline();
+      }
+    }
+
+    // Export Asset helper inside Violet Vault
+    function exportAsset(destination) {
+      alert(`Deliverable asset successfully exported to: ${destination}`);
+    }
+
+    // Modal Control Functions
+    function openSetupWizard() {
+      document.getElementById('modal-setup').classList.remove('hidden');
+    }
+
+    function closeSetupWizard() {
+      document.getElementById('modal-setup').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
