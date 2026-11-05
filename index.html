@@ -140,19 +140,19 @@
     </div>
 
     <!-- BUBBLE 5: BLUE (Dynamic Directive & Correction Center) -->
-    <div id="tunnel-bubble-5" class="tunnel-bubble bg-gradient-to-br from-[#3B82F6]/90 to-[#4A0E17]/95 border-4 border-[#3B82F6] w-[450px] h-[450px] z-30 opacity-0 scale-60 pointer-events-none" onclick="event.stopPropagation()">
-      <div class="text-center max-w-sm pointer-events-none w-full">
+    <div id="tunnel-bubble-5" class="tunnel-bubble bg-gradient-to-br from-[#3B82F6]/90 to-[#4A0E17]/95 border-4 border-[#3B82F6] w-[480px] h-[480px] z-30 opacity-0 scale-60 pointer-events-none" onclick="event.stopPropagation()">
+      <div class="text-center max-w-sm pointer-events-auto w-full" onclick="event.stopPropagation()">
         <span class="px-3 py-1 bg-white/20 text-white font-mono text-xs rounded-full font-bold">Phase 5 of 7</span>
         <h2 class="text-2xl font-black mt-2 text-white">Blue: Directives</h2>
         <p class="text-[11px] text-white/80 mt-1 font-mono">Natural language local agent prompt core.</p>
         
         <!-- Interactive Agent Prompt Form -->
-        <div class="mt-4 bg-black/50 p-4 rounded-2xl border border-white/20 text-left pointer-events-auto flex flex-col gap-3" onclick="event.stopPropagation()">
+        <div class="mt-4 bg-black/60 p-4 rounded-2xl border border-white/20 text-left pointer-events-auto flex flex-col gap-3 shadow-2xl" onclick="event.stopPropagation()">
           <label class="text-xs font-bold text-yellow font-mono">Directive Input (Local Qwen):</label>
-          <input type="text" id="directiveInput" placeholder="Ask local agent (e.g., Hello Samuel)..." class="w-full bg-black/60 border border-white/30 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-yellow font-mono" onclick="event.stopPropagation()">
-          <button id="submitDirectiveBtn" class="w-full bg-yellow text-black font-bold py-2 rounded-xl text-xs hover:bg-yellowDark transition font-mono" onclick="event.stopPropagation()">Execute Local Directive</button>
+          <input type="text" id="directiveInput" placeholder="Ask local agent (e.g., Hello Samuel)..." class="w-full bg-black/80 border border-white/30 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-yellow font-mono" onclick="event.stopPropagation()">
+          <button id="submitDirectiveBtn" class="w-full bg-yellow text-black font-bold py-2 rounded-xl text-xs hover:bg-yellowDark transition font-mono cursor-pointer" onclick="event.stopPropagation()">Execute Local Directive</button>
           
-          <div class="mt-2 bg-black/70 p-3 rounded-xl border border-white/10 max-h-32 overflow-y-auto" onclick="event.stopPropagation()">
+          <div class="mt-2 bg-black/80 p-3 rounded-xl border border-white/10 max-h-32 overflow-y-auto" onclick="event.stopPropagation()">
             <div class="text-[10px] font-mono text-yellow/70 mb-1">Agent Response Output:</div>
             <div id="agentOutputContainer" class="text-xs text-white/90 font-mono whitespace-pre-wrap">Awaiting local directive...</div>
           </div>
@@ -275,7 +275,7 @@
 
         if (submitBtn) {
             submitBtn.addEventListener("click", async (event) => {
-                event.stopPropagation(); // Prevent tunnel traversal click from triggering
+                event.stopPropagation();
                 const promptText = directiveInput.value.trim();
                 if (!promptText) return;
 
