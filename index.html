@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>7SS - 1st-Person Tunnel Traversal UI (Building Run #2)</title>
+  <title>7SS - 1st-Person Tunnel Traversal UI (Building Run #3)</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -63,7 +63,7 @@
 </head>
 <body class="bg-black text-white font-sans antialiased min-h-screen flex flex-col items-center justify-center overflow-hidden selection:bg-yellow selection:text-black">
 
-  <!-- OS Floating Dynamic Island (Exception Override) -->
+  <!-- OS Floating Dynamic Island -->
   <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-2.5 rounded-full bg-black/90 text-white shadow-2xl border border-yellow/30 backdrop-blur-md">
     <div class="flex items-center gap-1.5" id="island-bubbles">
       <span class="w-3 h-3 rounded-full bg-[#FF4A4A] inline-block cursor-pointer hover:scale-125 transition" onclick="jumpToBubble(1)" title="Red: Intent"></span>
@@ -83,39 +83,45 @@
   <!-- 1ST-PERSON TUNNEL VIEWPORT CONTAINER -->
   <div class="relative w-[750px] h-[750px] flex items-center justify-center cursor-pointer" onclick="advanceTunnel(event)">
 
-    <!-- BUBBLE 1: RED (Intent & State Hub) -->
-    <div id="tunnel-bubble-1" class="tunnel-bubble bg-gradient-to-br from-[#FF4A4A]/90 to-[#4A0E17]/95 border-4 border-[#FF4A4A] w-[700px] h-[700px] z-70">
-      <div class="text-center max-w-md pointer-events-none">
+    <!-- BUBBLE 1: RED (Intent & State Hub) -> Wired to /api/intent -->
+    <div id="tunnel-bubble-1" class="tunnel-bubble bg-gradient-to-br from-[#FF4A4A]/90 to-[#4A0E17]/95 border-4 border-[#FF4A4A] w-[700px] h-[700px] z-70" onclick="event.stopPropagation()">
+      <div class="text-center max-w-md pointer-events-auto w-full" onclick="event.stopPropagation()">
         <span class="px-3 py-1 bg-white/20 text-white font-mono text-xs rounded-full font-bold">Phase 1 of 7</span>
-        <h2 class="text-4xl font-black mt-3 text-white">Red: Intent & State Hub</h2>
-        <p class="text-xs text-white/80 mt-2 font-mono">Active Environment: Work & Trade Finance</p>
-        <div class="mt-8 bg-black/40 p-4 rounded-2xl border border-white/20 text-left pointer-events-auto">
-          <div class="text-xs font-bold text-yellow mb-1">Funneled Workline Item:</div>
-          <div class="text-xs text-white bg-white/10 p-2.5 rounded-xl hover:bg-white/20 transition flex justify-between items-center" onclick="event.stopPropagation(); advanceTunnelDirect();">
-            <span>🚀 Green Oil Credit Facility Structuring</span>
-            <span class="text-[10px] font-mono text-yellow">Click to Dive Deeper &rarr;</span>
+        <h2 class="text-3xl font-black mt-2 text-white">Red: Intent & State Hub</h2>
+        
+        <div class="mt-4 bg-black/60 p-4 rounded-2xl border border-white/20 text-left flex flex-col gap-2.5 shadow-xl" onclick="event.stopPropagation()">
+          <label class="text-[11px] font-bold text-yellow font-mono">Input Workline / Objective:</label>
+          <input type="text" id="intentInput" placeholder="e.g., Structure corporate trade credit facility..." class="w-full bg-black/80 border border-white/30 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-yellow font-mono" onclick="event.stopPropagation()">
+          <button id="submitIntentBtn" class="w-full bg-[#FF4A4A] text-white font-bold py-2 rounded-xl text-xs hover:bg-red-600 transition font-mono cursor-pointer" onclick="event.stopPropagation()">Analyze Intent (/api/intent)</button>
+          
+          <div class="bg-black/80 p-2.5 rounded-xl border border-white/10 max-h-24 overflow-y-auto" onclick="event.stopPropagation()">
+            <div class="text-[10px] font-mono text-yellow/70 mb-0.5">Intent Analysis Output:</div>
+            <div id="intentOutputContainer" class="text-[11px] text-white/90 font-mono whitespace-pre-wrap">Awaiting intent input...</div>
           </div>
         </div>
-        <p class="text-[11px] text-yellow/90 mt-6 animate-pulse">Click anywhere inside bubble to plunge into Phase 2 &darr;</p>
+
+        <p class="text-[11px] text-yellow/90 mt-4 animate-pulse cursor-pointer" onclick="advanceTunnelDirect()">Click here or bubble to dive into Phase 2 &darr;</p>
       </div>
     </div>
 
-    <!-- BUBBLE 2: ORANGE (Segment & Sequence Decomposer) -->
-    <div id="tunnel-bubble-2" class="tunnel-bubble bg-gradient-to-br from-[#FF7310]/90 to-[#4A0E17]/95 border-4 border-[#FF7310] w-[600px] h-[600px] z-60 opacity-20 scale-90 pointer-events-none">
-      <div class="text-center max-w-md pointer-events-none">
+    <!-- BUBBLE 2: ORANGE (Segment & Sequence Decomposer) -> Wired to /api/decompose -->
+    <div id="tunnel-bubble-2" class="tunnel-bubble bg-gradient-to-br from-[#FF7310]/90 to-[#4A0E17]/95 border-4 border-[#FF7310] w-[600px] h-[600px] z-60 opacity-20 scale-90 pointer-events-none" onclick="event.stopPropagation()">
+      <div class="text-center max-w-md pointer-events-auto w-full" onclick="event.stopPropagation()">
         <span class="px-3 py-1 bg-white/20 text-white font-mono text-xs rounded-full font-bold">Phase 2 of 7</span>
-        <h2 class="text-3xl font-black mt-3 text-white">Orange: Segment & Sequence</h2>
-        <div class="mt-6 grid grid-cols-2 gap-3 text-left">
-          <div class="bg-black/40 p-3 rounded-xl border border-white/20 text-xs">
-            <span class="text-orange-300 font-bold">Segment A</span>
-            <p class="text-[11px] text-white/80 mt-1">Financial Terms Table</p>
-          </div>
-          <div class="bg-black/40 p-3 rounded-xl border border-white/20 text-xs">
-            <span class="text-orange-300 font-bold">Segment B</span>
-            <p class="text-[11px] text-white/80 mt-1">Schedule Milestones</p>
+        <h2 class="text-2xl font-black mt-2 text-white">Orange: Decomposer</h2>
+
+        <div class="mt-3 bg-black/60 p-3.5 rounded-2xl border border-white/20 text-left flex flex-col gap-2 shadow-xl" onclick="event.stopPropagation()">
+          <label class="text-[11px] font-bold text-yellow font-mono">Content to Decompose:</label>
+          <input type="text" id="decomposeInput" placeholder="e.g., Rollout plan for 7SS repository..." class="w-full bg-black/80 border border-white/30 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-yellow font-mono" onclick="event.stopPropagation()">
+          <button id="submitDecomposeBtn" class="w-full bg-[#FF7310] text-white font-bold py-2 rounded-xl text-xs hover:bg-orange-600 transition font-mono cursor-pointer" onclick="event.stopPropagation()">Decompose Segments (/api/decompose)</button>
+          
+          <div class="bg-black/80 p-2.5 rounded-xl border border-white/10 max-h-24 overflow-y-auto" onclick="event.stopPropagation()">
+            <div class="text-[10px] font-mono text-yellow/70 mb-0.5">Decomposition Output:</div>
+            <div id="decomposeOutputContainer" class="text-[11px] text-white/90 font-mono whitespace-pre-wrap">Awaiting decomposition input...</div>
           </div>
         </div>
-        <p class="text-[11px] text-yellow/90 mt-6 animate-pulse">Click to dive into Phase 3 &darr;</p>
+
+        <p class="text-[11px] text-yellow/90 mt-3 animate-pulse cursor-pointer" onclick="advanceTunnelDirect()">Click to dive into Phase 3 &darr;</p>
       </div>
     </div>
 
@@ -123,56 +129,46 @@
     <div id="tunnel-bubble-3" class="tunnel-bubble bg-gradient-to-br from-[#FFCC15]/90 to-[#4A0E17]/95 border-4 border-[#FFCC15] w-[500px] h-[500px] z-50 opacity-10 scale-80 pointer-events-none">
       <div class="text-center max-w-md text-black pointer-events-none">
         <span class="px-3 py-1 bg-black/20 font-mono text-xs rounded-full font-bold">Phase 3 of 7</span>
-        <h2 class="text-3xl font-black mt-3">Yellow: Foresight & Demos</h2>
-        <p class="text-xs text-black/80 mt-2 font-mono">Strategic recommendations & quick-view preview canvas.</p>
+        <h2 class="text-3xl font-black mt-3">Yellow: Foresight</h2>
+        <p class="text-xs text-black/80 mt-2 font-mono">Strategic recommendations & preview canvas.</p>
         <p class="text-[11px] text-burgundy font-bold mt-6 animate-pulse">Click to dive into Phase 4 &darr;</p>
       </div>
     </div>
 
-    <!-- BUBBLE 4: GREEN (Vision & OS Telepresence Engine) -->
+    <!-- BUBBLE 4: GREEN (Vision OCR) -->
     <div id="tunnel-bubble-4" class="tunnel-bubble bg-gradient-to-br from-[#10B981]/90 to-[#4A0E17]/95 border-4 border-[#10B981] w-[400px] h-[400px] z-40 opacity-5 scale-70 pointer-events-none">
       <div class="text-center max-w-md pointer-events-none">
         <span class="px-3 py-1 bg-white/20 text-white font-mono text-xs rounded-full font-bold">Phase 4 of 7</span>
         <h2 class="text-2xl font-black mt-3 text-white">Green: Live OCR Feed</h2>
-        <p class="text-xs text-white/80 mt-2 font-mono">Screen capture bounding boxes active.</p>
         <p class="text-[11px] text-yellow/90 mt-6 animate-pulse">Click to dive into Phase 5 &darr;</p>
       </div>
     </div>
 
-    <!-- BUBBLE 5: BLUE (Dynamic Directive & Correction Center) -->
+    <!-- BUBBLE 5: BLUE (Directives) -->
     <div id="tunnel-bubble-5" class="tunnel-bubble bg-gradient-to-br from-[#3B82F6]/90 to-[#4A0E17]/95 border-4 border-[#3B82F6] w-[480px] h-[480px] z-30 opacity-0 scale-60 pointer-events-none" onclick="event.stopPropagation()">
       <div class="text-center max-w-sm pointer-events-auto w-full" onclick="event.stopPropagation()">
         <span class="px-3 py-1 bg-white/20 text-white font-mono text-xs rounded-full font-bold">Phase 5 of 7</span>
         <h2 class="text-2xl font-black mt-2 text-white">Blue: Directives</h2>
-        <p class="text-[11px] text-white/80 mt-1 font-mono">Natural language local agent prompt core.</p>
-        
-        <!-- Interactive Agent Prompt Form -->
         <div class="mt-4 bg-black/60 p-4 rounded-2xl border border-white/20 text-left pointer-events-auto flex flex-col gap-3 shadow-2xl" onclick="event.stopPropagation()">
-          <label class="text-xs font-bold text-yellow font-mono">Directive Input (Local Qwen):</label>
-          <input type="text" id="directiveInput" placeholder="Ask local agent (e.g., Hello Samuel)..." class="w-full bg-black/80 border border-white/30 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-yellow font-mono" onclick="event.stopPropagation()">
-          <button id="submitDirectiveBtn" class="w-full bg-yellow text-black font-bold py-2 rounded-xl text-xs hover:bg-yellowDark transition font-mono cursor-pointer" onclick="event.stopPropagation()">Execute Local Directive</button>
+          <label class="text-xs font-bold text-yellow font-mono">Directive Input:</label>
+          <input type="text" id="directiveInput" placeholder="Ask local agent..." class="w-full bg-black/80 border border-white/30 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-yellow font-mono" onclick="event.stopPropagation()">
+          <button id="submitDirectiveBtn" class="w-full bg-yellow text-black font-bold py-2 rounded-xl text-xs hover:bg-yellowDark transition font-mono cursor-pointer" onclick="event.stopPropagation()">Execute Local Directive (/api/agent)</button>
           
           <div class="mt-2 bg-black/80 p-3 rounded-xl border border-white/10 max-h-32 overflow-y-auto" onclick="event.stopPropagation()">
-            <div class="text-[10px] font-mono text-yellow/70 mb-1">Agent Response Output:</div>
             <div id="agentOutputContainer" class="text-xs text-white/90 font-mono whitespace-pre-wrap">Awaiting local directive...</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- BUBBLE 6: INDIGO (Telemetry & Privacy Vault) -->
+    <!-- BUBBLE 6: INDIGO -->
     <div id="tunnel-bubble-6" class="tunnel-bubble bg-gradient-to-br from-[#6366F1]/90 to-[#4A0E17]/95 border-4 border-[#6366F1] w-[200px] h-[200px] z-20 opacity-0 scale-50 pointer-events-none">
-      <div class="text-center max-w-[180px] pointer-events-none">
-        <span class="px-2 py-0.5 bg-white/20 text-white font-mono text-[10px] rounded-full font-bold">Phase 6</span>
-        <h3 class="text-lg font-black mt-1 text-white">Indigo: Telemetry</h3>
-      </div>
+      <div class="text-center pointer-events-none"><span class="text-white font-mono text-[10px] font-bold">Phase 6: Indigo</span></div>
     </div>
 
-    <!-- BUBBLE 7: VIOLET (Omni-Destination Dispatcher) -->
+    <!-- BUBBLE 7: VIOLET -->
     <div id="tunnel-bubble-7" class="tunnel-bubble bg-gradient-to-br from-[#A855F7]/90 to-[#4A0E17]/95 border-4 border-[#A855F7] w-[120px] h-[120px] z-10 opacity-0 scale-40 pointer-events-none">
-      <div class="text-center pointer-events-none">
-        <span class="text-white font-mono text-[10px] font-bold">Phase 7: Violet</span>
-      </div>
+      <div class="text-center pointer-events-none"><span class="text-white font-mono text-[10px] font-bold">Phase 7: Violet</span></div>
     </div>
 
   </div>
@@ -199,14 +195,12 @@
         const distance = i - currentPhase;
 
         if (i === currentPhase) {
-          // Active bubble in front
           bubble.style.zIndex = "70";
           bubble.style.opacity = "1";
           bubble.style.pointerEvents = "auto";
           bubble.style.transform = "scale(1)";
           bubble.style.filter = "blur(0px)";
         } else if (i > currentPhase) {
-          // Future bubbles waiting in the tunnel ahead
           const scale = Math.max(0.4, 1 - (distance * 0.15));
           bubble.style.zIndex = String(70 - (distance * 10));
           bubble.style.opacity = Math.max(0, 0.3 - ((distance - 1) * 0.1));
@@ -214,7 +208,6 @@
           bubble.style.transform = `scale(${scale})`;
           bubble.style.filter = "blur(4px)";
         } else {
-          // Past bubbles behind us
           bubble.style.zIndex = "1";
           bubble.style.opacity = "0";
           bubble.style.pointerEvents = "none";
@@ -226,19 +219,12 @@
     }
 
     function advanceTunnel(event) {
-      if (currentPhase < totalPhases) {
-        currentPhase++;
-      } else {
-        currentPhase = 1; // Loop back to Red
-      }
+      if (currentPhase < totalPhases) { currentPhase++; } else { currentPhase = 1; }
       updateTunnelView();
     }
 
     function advanceTunnelDirect() {
-      if (currentPhase < totalPhases) {
-        currentPhase++;
-        updateTunnelView();
-      }
+      if (currentPhase < totalPhases) { currentPhase++; updateTunnelView(); }
     }
 
     function jumpToBubble(phaseIndex) {
@@ -246,47 +232,70 @@
       updateTunnelView();
     }
 
-    // --- 7SS Local Bridge Integration ---
-    async function sendDirectiveToAgent(userPrompt) {
-        const bridgeUrl = "http://127.0.0.1:8000/api/agent";
+    // --- Backend API Call Helpers ---
+    async function callBridgeEndpoint(endpoint, promptText) {
         try {
-            const response = await fetch(bridgeUrl, {
+            const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ prompt: userPrompt })
+                body: JSON.stringify({ prompt: promptText })
             });
-
-            if (!response.ok) {
-                throw new Error(`Bridge Error: ${response.statusText}`);
-            }
-
+            if (!response.ok) throw new Error(`Bridge Error: ${response.statusText}`);
             const data = await response.json();
             return data.response;
         } catch (error) {
-            console.error("Failed to reach 7SS local bridge:", error);
-            return "Error: Ensure bridge.py and Ollama are active locally.";
+            console.error("Bridge connection failed:", error);
+            return "Error: Ensure bridge.py is running on port 8000.";
         }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-        const submitBtn = document.getElementById("submitDirectiveBtn");
-        const directiveInput = document.getElementById("directiveInput");
-        const outputContainer = document.getElementById("agentOutputContainer");
+        // Phase 1: Intent Hub
+        const submitIntentBtn = document.getElementById("submitIntentBtn");
+        const intentInput = document.getElementById("intentInput");
+        const intentOutput = document.getElementById("intentOutputContainer");
 
-        if (submitBtn) {
-            submitBtn.addEventListener("click", async (event) => {
+        if (submitIntentBtn) {
+            submitIntentBtn.addEventListener("click", async (event) => {
                 event.stopPropagation();
-                const promptText = directiveInput.value.trim();
-                if (!promptText) return;
+                const text = intentInput.value.trim();
+                if (!text) return;
+                intentOutput.innerText = "Analyzing intent via local Qwen...";
+                intentOutput.innerText = await callBridgeEndpoint("/api/intent", text);
+            });
+        }
 
-                outputContainer.innerText = "Processing via local qwen3.5:4b...";
-                const result = await sendDirectiveToAgent(promptText);
-                outputContainer.innerText = result;
+        // Phase 2: Decomposer
+        const submitDecomposeBtn = document.getElementById("submitDecomposeBtn");
+        const decomposeInput = document.getElementById("decomposeInput");
+        const decomposeOutput = document.getElementById("decomposeOutputContainer");
+
+        if (submitDecomposeBtn) {
+            submitDecomposeBtn.addEventListener("click", async (event) => {
+                event.stopPropagation();
+                const text = decomposeInput.value.trim();
+                if (!text) return;
+                decomposeOutput.innerText = "Decomposing segments via local Qwen...";
+                decomposeOutput.innerText = await callBridgeEndpoint("/api/decompose", text);
+            });
+        }
+
+        // Phase 5: General Directive Agent
+        const submitDirectiveBtn = document.getElementById("submitDirectiveBtn");
+        const directiveInput = document.getElementById("directiveInput");
+        const agentOutput = document.getElementById("agentOutputContainer");
+
+        if (submitDirectiveBtn) {
+            submitDirectiveBtn.addEventListener("click", async (event) => {
+                event.stopPropagation();
+                const text = directiveInput.value.trim();
+                if (!text) return;
+                agentOutput.innerText = "Processing local directive...";
+                agentOutput.innerText = await callBridgeEndpoint("/api/agent", text);
             });
         }
     });
 
-    // Initialize Tunnel
     updateTunnelView();
   </script>
 </body>
