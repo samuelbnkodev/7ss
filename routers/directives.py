@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from services.ollama import query_ollama
 
-router = APIRouter(prefix=" /api", tags=["Phase 5 - Directives"])
+router = APIRouter(prefix="/api", tags=["Phase 5 - Directives"])
 
 class AgentRequest(BaseModel):
     prompt: str
