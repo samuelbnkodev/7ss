@@ -1,8 +1,9 @@
+# bridge.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import intent, decompose, dispatch
+from routers import intent, decompose, foresight, transformation, directives, assembly, dispatch
 
-app = FastAPI(title="7SS Modular Local Bridge", version="3.1")
+app = FastAPI(title="7SS Full Rainbow Modular Engine", version="3.5")
 
 app.add_middleware(
     CORSMiddleware,
@@ -12,14 +13,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Attach phase routers
-app.include_router(intent.router)
-app.include_router(decompose.router)
-app.include_router(dispatch.router)
+# Register all 7 rainbow phase routers
+app.include_router(intent.router)         # Phase 1: Red
+app.include_router(decompose.router)      # Phase 2: Orange
+app.include_router(foresight.router)      # Phase 3: Yellow
+app.include_router(transformation.router) # Phase 4: Green
+app.include_router(directives.router)     # Phase 5: Blue
+app.include_router(assembly.router)       # Phase 6: Indigo
+app.include_router(dispatch.router)       # Phase 7: Violet
 
 @app.get("/")
 def health_check():
-    return {"status": "online", "system": "7SS Modular Engine v3.1"}
+    return {"status": "online", "system": "7SS Full Rainbow Engine v3.5"}
 
 if __name__ == "__main__":
     import uvicorn
