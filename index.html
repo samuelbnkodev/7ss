@@ -675,6 +675,16 @@
       }
     }
 
+   function formatMarkdown(str) {
+      if (!str) return '';
+      return escapeHtml(str)
+        .replace(/^### (.*$)/gim, '<h3 style="font-weight:700; margin-top:8px; color:inherit;">$1</h3>')
+        .replace(/^## (.*$)/gim, '<h2 style="font-weight:700; margin-top:10px; color:inherit;">$1</h2>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*\*/g, '<em>$1</em>')
+        .replace(/\n/g, '<br>');
+    }
+
     function renderTelemetryCard(phaseNum, cfg, text) {
       const empty = document.getElementById("emptyState");
       if (empty) empty.remove();
@@ -693,7 +703,7 @@
           <span>${cfg.name}</span>
           <span>✓ LOCKED IN</span>
         </div>
-        <div class="card-body">${marked.parse(text)}</div>
+        <div class="card-body">${formatMarkdown(text)}</div>
       `;
 
       stream.appendChild(card);
