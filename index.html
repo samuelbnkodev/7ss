@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>7SS — Armillary Cognitive OS</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.js"></script>
   <style>
     :root {
       --bg-void: #05060a;
@@ -692,7 +693,7 @@
           <span>${cfg.name}</span>
           <span>✓ LOCKED IN</span>
         </div>
-        <div class="card-body">${escapeHtml(text)}</div>
+        <div class="card-body">${marked.parse(text)}</div>
       `;
 
       stream.appendChild(card);
