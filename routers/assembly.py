@@ -1,14 +1,25 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from services.ollama import query_ollama
+from typing import Dict, Any
 
 router = APIRouter(prefix="/api", tags=["Phase 6 - Assembly"])
 
-class AgentRequest(BaseModel):
+class AssemblyRequest(BaseModel):
     prompt: str
+    phase_results: Dict[str, Any] = {}
 
-@router.post("/assemble")
-async def assembly_endpoint(req: AgentRequest):
-    system_msg = "You are the 7SS Synthesis & Assembly Engine. Consolidate all preceding phase outputs into a unified package."
-    response_text = await query_ollama(system_msg, req.prompt)
-    return {"success": True, "phase": "Indigo (Assembly)", "response": response_text}
+@router.post("/assembly")
+async def assembly_endpoint(req: AssemblyRequest):
+    # Aggregate all multi-phase outputs into a unified package
+    compiled_package = {
+        "status": "assembled",
+        "phase": "Indigo (Assembly)",
+        "original_prompt": req.prompt,
+        "components_integrated": list(req.phase_results.keys()),
+        "telemetry_summary": {
+            "total_phases_logged": len(req.phase_results),
+            "execution_ready": True
+        },
+        "payload": req.phase_results
+    }
+    return compiled_package
