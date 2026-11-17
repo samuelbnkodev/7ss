@@ -23,8 +23,8 @@ app.include_router(assembly.router)       # Phase 6: Indigo
 app.include_router(dispatch.router)       # Phase 7: Violet
 
 @app.get("/")
-def health_check():
-    return {"status": "online", "system": "7SS Full Rainbow Engine v3.5"}
+def root():
+    return {"system": "7SS Orchestrator Active", "status": "operational"}
 
 if __name__ == "__main__":
     import uvicorn
