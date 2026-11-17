@@ -1,21 +1,22 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
+from pydantic import BaseModel
 from typing import Dict, Any
 import json
 import os
 
 router = APIRouter(prefix="/api", tags=["Phase 7 - Dispatch"])
 
+class DispatchRequest(BaseModel):
+    package: Dict[str, Any]
+
 @router.post("/dispatch")
-async def dispatch_endpoint(request: Request):
-    body = await request.json()
-    
-    # Handle both wrapped {"package": {...}} and raw dictionary payloads
-    audit_entry = body.get("package", body)
-    
+async def dispatch_endpoint(req: DispatchRequest):
     os.makedirs("logs", exist_ok=True)
     log_path = "logs/execution_audit.json"
     
+    audit_entry = req.package
     dispatch_success = True
+    
     try:
         logs = []
         if os.path.exists(log_path):
