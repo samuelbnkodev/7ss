@@ -1,0 +1,13 @@
+[
+  {
+    "intent": "Automate workstation check",
+    "directives_executed": [
+      {
+        "command": "WAIT",
+        "target": "1",
+        "success": true
+      }
+    ],
+    "status": "completed"
+  }
+]
